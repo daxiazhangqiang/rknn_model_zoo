@@ -5,6 +5,7 @@ from rknn.api import RKNN
 DATASET_PATH = '../../../datasets/COCO/coco_subset_20.txt'
 DEFAULT_RKNN_PATH = '../model/yolov5.rknn'
 DEFAULT_QUANT = True
+ACCURACY_ANALYSIS=False
 
 def parse_arg():
     if len(sys.argv) < 3:
@@ -71,5 +72,9 @@ if __name__ == '__main__':
         exit(ret)
     print('done')
 
+    if ACCURACY_ANALYSIS:
+        print('--> Accuracy analysis')
+        ret = rknn.accuracy_analysis(inputs=["/home/robot/zhangqiang/rknn_model_zoo/examples/yolov5/model/bus.jpg"], target="rk3588")
+    
     # Release
     rknn.release()

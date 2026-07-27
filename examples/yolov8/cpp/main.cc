@@ -19,31 +19,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fstream>
 
 #include "yolov8.h"
 #include "image_utils.h"
 #include "file_utils.h"
 #include "image_drawing.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 #if defined(RV1106_1103) 
     #include "dma_alloc.hpp"
 #endif
+
+#define DRAW_IMAGE 0
 
 /*-------------------------------------------
                   Main Function
 -------------------------------------------*/
 int main(int argc, char **argv)
 {
-    if (argc != 3)
+    if (argc != 4)
     {
-        printf("%s <model_path> <image_path>\n", argv[0]);
+        printf("%s <model_path> <image_path> <json_path>\n", argv[0]);
         return -1;
     }
 
     const char *model_path = argv[1];
     const char *image_path = argv[2];
+    const char *json_path = argv[3];
 
     int ret;
+    int exit_code = 0;
     rknn_app_context_t rknn_app_ctx;
     memset(&rknn_app_ctx, 0, sizeof(rknn_app_context_t));
 
@@ -53,7 +61,8 @@ int main(int argc, char **argv)
     if (ret != 0)
     {
         printf("init_yolov8_model fail! ret=%d model_path=%s\n", ret, model_path);
-        goto out;
+        deinit_post_process();
+        return -1;
     }
 
     image_buffer_t src_image;
@@ -75,41 +84,71 @@ int main(int argc, char **argv)
     if (ret != 0)
     {
         printf("read image fail! ret=%d image_path=%s\n", ret, image_path);
-        goto out;
+        exit_code = -1;
     }
-
-    object_detect_result_list od_results;
-
-    ret = inference_yolov8_model(&rknn_app_ctx, &src_image, &od_results);
-    if (ret != 0)
+    else
     {
-        printf("init_yolov8_model fail! ret=%d\n", ret);
-        goto out;
+        object_detect_result_list od_results;
+
+        ret = inference_yolov8_model(&rknn_app_ctx, &src_image, &od_results);
+        if (ret != 0)
+        {
+            printf("inference_yolov8_model fail! ret=%d\n", ret);
+            exit_code = -1;
+        }
+        else
+        {
+            // 画框和概率
+            json output_json = json::array();
+
+            for (int i = 0; i < od_results.count; i++)
+            {
+                object_detect_result *det_result = &(od_results.results[i]);
+                printf("%s @ (%d %d %d %d) %.3f\n", coco_cls_to_name(det_result->cls_id),
+                       det_result->box.left, det_result->box.top,
+                       det_result->box.right, det_result->box.bottom,
+                       det_result->prop);
+                int x1 = det_result->box.left;
+                int y1 = det_result->box.top;
+                int x2 = det_result->box.right;
+                int y2 = det_result->box.bottom;
+#if DRAW_IMAGE
+                draw_rectangle(&src_image, x1, y1, x2 - x1, y2 - y1, COLOR_BLUE, 3);
+                char text[256];
+                sprintf(text, "%s %.1f%%", coco_cls_to_name(det_result->cls_id), det_result->prop * 100);
+                draw_text(&src_image, text, x1, y1 - 20, COLOR_RED, 10);
+#endif
+                // 构建 JSON 检测结果，仅包含 bbox [x1,y1,x2,y2] 和 score
+                json det_obj;
+                det_obj["bbox"] = {x1, y1, x2, y2};
+                det_obj["score"] = det_result->prop;
+                det_obj["class"] = det_result->cls_id;
+                // 添加一行从 coco_cls_to_name 获取的类别名称
+                det_obj["class_name"] = coco_cls_to_name(det_result->cls_id);
+                output_json.push_back(det_obj);
+            }
+
+            // 写入 JSON 文件
+            std::ofstream json_file(json_path);
+            if (json_file.is_open())
+            {
+                json_file << output_json.dump(2);
+                json_file.close();
+                printf("Results saved to %s\n", json_path);
+            }
+            else
+            {
+                printf("Failed to open %s for writing\n", json_path);
+                exit_code = -1;
+            }
+
+#if DRAW_IMAGE
+            write_image("out.png", &src_image);
+#endif
+        }
     }
 
-    // 画框和概率
-    char text[256];
-    for (int i = 0; i < od_results.count; i++)
-    {
-        object_detect_result *det_result = &(od_results.results[i]);
-        printf("%s @ (%d %d %d %d) %.3f\n", coco_cls_to_name(det_result->cls_id),
-               det_result->box.left, det_result->box.top,
-               det_result->box.right, det_result->box.bottom,
-               det_result->prop);
-        int x1 = det_result->box.left;
-        int y1 = det_result->box.top;
-        int x2 = det_result->box.right;
-        int y2 = det_result->box.bottom;
-
-        draw_rectangle(&src_image, x1, y1, x2 - x1, y2 - y1, COLOR_BLUE, 3);
-
-        sprintf(text, "%s %.1f%%", coco_cls_to_name(det_result->cls_id), det_result->prop * 100);
-        draw_text(&src_image, text, x1, y1 - 20, COLOR_RED, 10);
-    }
-
-    write_image("out.png", &src_image);
-
-out:
+    // 清理资源
     deinit_post_process();
 
     ret = release_yolov8_model(&rknn_app_ctx);
@@ -128,5 +167,5 @@ out:
 #endif
     }
 
-    return 0;
+    return exit_code;
 }

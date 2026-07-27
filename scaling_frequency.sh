@@ -1,4 +1,4 @@
-
+#!/bin/bash
 chip_name=0
 freq_set_status=0
 

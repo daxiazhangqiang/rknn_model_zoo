@@ -24,7 +24,7 @@
 #include "image_utils.h"
 #include "file_utils.h"
 #include "image_drawing.h"
-
+#include "easy_timer.h"
 #if defined(RV1106_1103) 
     #include "dma_alloc.hpp"
 #endif
@@ -42,7 +42,10 @@ int main(int argc, char **argv)
 
     const char *model_path = argv[1];
     const char *image_path = argv[2];
-
+    
+    //timerr
+    TIMER timer;
+    
     int ret;
     rknn_app_context_t rknn_app_ctx;
     memset(&rknn_app_ctx, 0, sizeof(rknn_app_context_t));
@@ -80,12 +83,15 @@ int main(int argc, char **argv)
 
     object_detect_result_list od_results;
 
+    timer.tik();
     ret = inference_yolov5_model(&rknn_app_ctx, &src_image, &od_results);
     if (ret != 0)
     {
         printf("init_yolov5_model fail! ret=%d\n", ret);
         goto out;
     }
+    timer.tok();
+    timer.print_time("model inference run cost:");
 
     // 画框和概率
     char text[256];

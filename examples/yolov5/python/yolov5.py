@@ -10,6 +10,7 @@ realpath = realpath.split(_sep)
 sys.path.append(os.path.join(realpath[0]+_sep, *realpath[1:realpath.index('rknn_model_zoo')+1]))
 
 from py_utils.coco_utils import COCO_test_helper
+from py_utils.rknn_executor import RKNN_model_container
 import numpy as np
 
 
@@ -179,8 +180,12 @@ def setup_model(args):
         model = Torch_model_container(args.model_path)
     elif model_path.endswith('.rknn'):
         platform = 'rknn'
-        from py_utils.rknn_executor import RKNN_model_container 
-        model = RKNN_model_container(args.model_path, args.target, args.device_id)
+        from py_utils.rknn_executor import RKNN_model_container
+        model = RKNN_model_container(args.model_path,
+                                      args.target, 
+                                      args.device_id, 
+                                     perf_debug=args.eval_perf,
+                                     eval_mem=args.eval_mem)
     elif model_path.endswith('onnx'):
         platform = 'onnx'
         from py_utils.onnx_executor import ONNX_model_container
@@ -201,7 +206,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some integers.')
     # basic params
     parser.add_argument('--model_path', type=str, required= True, help='model path, could be .pt or .rknn file')
-    parser.add_argument('--target', type=str, default='rk3566', help='target RKNPU platform')
+    parser.add_argument('--target', type=str, default='rk3588', help='target RKNPU platform')
     parser.add_argument('--device_id', type=str, default=None, help='device id')
     
     parser.add_argument('--img_show', action='store_true', default=False, help='draw the result and show')
@@ -213,7 +218,9 @@ if __name__ == '__main__':
     parser.add_argument('--img_folder', type=str, default='../model', help='img folder path')
     parser.add_argument('--coco_map_test', action='store_true', help='enable coco map test')
     parser.add_argument('--anchors', type=str, default='../model/anchors_yolov5.txt', help='target to anchor file, only yolov5, yolov7 need this param')
-
+    parser.add_argument('--eval_perf', action='store_true', default=False, help='Time consuming evaluation')
+    parser.add_argument('--eval_mem', action='store_true', default=False, help='memory consuming evaluation')
+    
     args = parser.parse_args()
 
     # load anchor
@@ -298,6 +305,16 @@ if __name__ == '__main__':
 
         from py_utils.coco_utils import coco_eval_with_json
         coco_eval_with_json(args.anno_json, pred_json)
+
+    if isinstance(model, RKNN_model_container):
+        # Eval Perf
+        if args.eval_perf:
+            print('--> Eval Perf')
+            model.rknn.eval_perf()
+        # Eval memory
+        if args.eval_mem:
+            print('--> Eval memory')
+            model.rknn.eval_memory()
 
     # release
     model.release()

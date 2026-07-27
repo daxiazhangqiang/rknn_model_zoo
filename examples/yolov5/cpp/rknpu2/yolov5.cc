@@ -21,6 +21,7 @@
 #include "common.h"
 #include "file_utils.h"
 #include "image_utils.h"
+#include "easy_timer.h"
 
 static void dump_tensor_attr(rknn_tensor_attr *attr)
 {
@@ -37,7 +38,7 @@ int init_yolov5_model(const char *model_path, rknn_app_context_t *app_ctx)
     int model_len = 0;
     char *model;
     rknn_context ctx = 0;
-
+    rknn_core_mask core_mask = RKNN_NPU_CORE_ALL;
     // Load RKNN Model
     model_len = read_data_from_file(model_path, &model);
     if (model == NULL)
@@ -53,6 +54,9 @@ int init_yolov5_model(const char *model_path, rknn_app_context_t *app_ctx)
         printf("rknn_init fail! ret=%d\n", ret);
         return -1;
     }
+
+    //use all npu in rk3588
+    rknn_set_core_mask(ctx, (rknn_core_mask)core_mask);
 
     // Get Model Input Output Number
     rknn_input_output_num io_num;
@@ -213,12 +217,17 @@ int inference_yolov5_model(rknn_app_context_t *app_ctx, image_buffer_t *img, obj
 
     // Run
     printf("rknn_run\n");
+    //timerr
+    TIMER timer;
+    timer.tik();
     ret = rknn_run(app_ctx->rknn_ctx, nullptr);
     if (ret < 0)
     {
         printf("rknn_run fail! ret=%d\n", ret);
         return -1;
     }
+    timer.tok();
+    timer.print_time("rknn_run cost:");
 
     // Get Output
     memset(outputs, 0, sizeof(outputs));

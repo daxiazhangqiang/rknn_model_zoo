@@ -60,6 +60,7 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${LIBRKNNRT_INCLUDES}
+    ${LIBTIMER_INCLUDES}
 )
 
 
@@ -97,6 +98,7 @@ if (NOT (TARGET_SOC STREQUAL "rv1106" OR TARGET_SOC STREQUAL "rv1103" OR TARGET_
     target_include_directories(${PROJECT_NAME}_zero_copy PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${LIBRKNNRT_INCLUDES}
+        ${LIBTIMER_INCLUDES}
     )
     install(TARGETS ${PROJECT_NAME}_zero_copy DESTINATION .)
 endif()
