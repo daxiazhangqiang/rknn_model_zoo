@@ -107,6 +107,7 @@ int main(int argc, char **argv)
     timer.tok();
     timer.print_time("inference_yolox_model");
 
+    timer.tik();
     // print detection results to console
     for (int i = 0; i < od_results.count; i++)
     {
@@ -206,7 +207,8 @@ int main(int argc, char **argv)
         ofs.close();
         printf("Results saved to %s\n", json_path);
     }
-
+    timer.tok();
+    timer.print_time("write out to json");
 #if DRAW_IMAGE
     write_multi_task_results(image_path, &src_image, &od_results, &pose_results, &face_results);
 #endif
