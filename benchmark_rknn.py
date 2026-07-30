@@ -45,8 +45,8 @@ def main():
     p.add_argument('--random-shape', default='640,640', help='Create random input with this shape. Provide H,W (default 640,640) or C,H,W or N,C,H,W. If H,W given, shape will be 1,3,H,W.')
     p.add_argument('--target', default='rk3588', help='RKNN target (default: rk3588). Use RKNN constants like RKNN.TARGET_NPU if needed')
     p.add_argument('--device-id', type=int, default=None, help='Device id when initializing runtime')
-    p.add_argument('--no-perf-debug', action='store_false', dest='perf_debug', default=True, help='Disable RKNN perf_debug when init_runtime')
-    p.add_argument('--no-eval-mem', action='store_false', dest='eval_mem', default=True, help='Disable RKNN memory eval when init_runtime')
+    p.add_argument('--perf-debug', action='store_true', dest='perf_debug', default=False, help='Enable RKNN perf_debug when init_runtime')
+    p.add_argument('--eval-mem', action='store_true', dest='eval_mem', default=False, help='Enable RKNN memory eval when init_runtime')
 
     args = p.parse_args()
 
