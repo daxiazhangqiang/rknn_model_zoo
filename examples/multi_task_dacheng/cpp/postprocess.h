@@ -16,6 +16,11 @@
 #define BOX_THRESH 0.25
 #define PROP_BOX_SIZE (5 + OBJ_CLASS_NUM)
 
+// Visualization control: set to 0 to disable drawing output images
+#ifndef DRAW_IMAGE
+#define DRAW_IMAGE 1
+#endif
+
 // class rknn_app_context_t;
 
 typedef struct {
@@ -40,7 +45,7 @@ typedef struct {
 typedef struct {
     int id;
     int count;
-    object_detect_result results[POSE_NUMB_MAX_SIZE];
+    pose_detect_result results[POSE_NUMB_MAX_SIZE];
 } pose_detect_result_list;
 
 
@@ -54,7 +59,7 @@ typedef struct {
 typedef struct {
     int id;
     int count;
-    object_detect_result results[FACE_NUMB_MAX_SIZE];
+    face_detect_result results[FACE_NUMB_MAX_SIZE];
 } face_detect_result_list;
 
 int init_post_process();
@@ -70,4 +75,25 @@ int post_process(rknn_app_context_t *app_ctx,
     face_detect_result_list *face_results);
 
 void deinitPostProcess();
+
+#if DRAW_IMAGE
+/**
+ * @brief Write multi-task visualization results — generates 3 images
+ *        (bbox / pose / face) in a folder named after the image basename.
+ * 
+ * @param image_path  [in] Original image path
+ * @param src_image   [in] Source image buffer (RGB888)
+ * @param od_results  [in] BBOX detection results
+ * @param pose_results[in] POSE detection results
+ * @param face_results[in] FACE detection results
+ * @return int 0: success, -1: error
+ */
+int write_multi_task_results(
+    const char *image_path,
+    image_buffer_t *src_image,
+    object_detect_result_list *od_results,
+    pose_detect_result_list *pose_results,
+    face_detect_result_list *face_results);
+#endif
+
 #endif //_RKNN_YOLOX_DEMO_POSTPROCESS_H_

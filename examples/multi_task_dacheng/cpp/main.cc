@@ -107,8 +107,7 @@ int main(int argc, char **argv)
     timer.tok();
     timer.print_time("inference_yolox_model");
 
-    // 画框和概率
-    char text[256];
+    // print detection results to console
     for (int i = 0; i < od_results.count; i++)
     {
         object_detect_result *det_result = &(od_results.results[i]);
@@ -116,18 +115,101 @@ int main(int argc, char **argv)
                det_result->box.left, det_result->box.top,
                det_result->box.right, det_result->box.bottom,
                det_result->prop);
-        int x1 = det_result->box.left;
-        int y1 = det_result->box.top;
-        int x2 = det_result->box.right;
-        int y2 = det_result->box.bottom;
+    }
+    for (int i = 0; i < pose_results.count; i++)
+    {
+        printf("pose[%d] @ (%d %d %d %d) %.3f\n", i,
+               pose_results.results[i].box.left, pose_results.results[i].box.top,
+               pose_results.results[i].box.right, pose_results.results[i].box.bottom,
+               pose_results.results[i].prop);
+    }
+    for (int i = 0; i < face_results.count; i++)
+    {
+        printf("face[%d] @ (%d %d %d %d) %.3f\n", i,
+               face_results.results[i].box.left, face_results.results[i].box.top,
+               face_results.results[i].box.right, face_results.results[i].box.bottom,
+               face_results.results[i].prop);
+    }
+    // ===== write results to JSON =====
+    {
+        json j;
+        j["orign_img_path"] = image_path;
 
-        draw_rectangle(&src_image, x1, y1, x2 - x1, y2 - y1, COLOR_BLUE, 3);
+        json model_results;
 
-        sprintf(text, "%s %.1f%%", coco_cls_to_name(det_result->cls_id), det_result->prop * 100);
-        draw_text(&src_image, text, x1, y1 - 20, COLOR_RED, 10);
+        // ---- object (BBOX) ----
+        json obj_arr = json::array();
+        for (int i = 0; i < od_results.count; i++) {
+            json obj;
+            obj["bbox"] = {od_results.results[i].box.left,
+                           od_results.results[i].box.top,
+                           od_results.results[i].box.right,
+                           od_results.results[i].box.bottom};
+            obj["class_name"] = coco_cls_to_name(od_results.results[i].cls_id);
+            obj["score"] = od_results.results[i].prop;
+            obj_arr.push_back(obj);
+        }
+        model_results["object"] = obj_arr;
+
+        // ---- pose (17 keypoints) ----
+        json pose_arr = json::array();
+        for (int i = 0; i < pose_results.count; i++) {
+            json pose;
+            pose["bbox"] = {pose_results.results[i].box.left,
+                            pose_results.results[i].box.top,
+                            pose_results.results[i].box.right,
+                            pose_results.results[i].box.bottom};
+            pose["class_name"] = "person";
+            pose["score"] = pose_results.results[i].prop;
+
+            json kpts;
+            for (int k = 0; k < 17; k++) {
+                char kname[16];
+                snprintf(kname, sizeof(kname), "kpt%d", k);
+                kpts[kname] = {{"x", pose_results.results[i].keypoints[k][0]},
+                               {"y", pose_results.results[i].keypoints[k][1]},
+                               {"score", pose_results.results[i].keypoints[k][2]}};
+            }
+            pose["keypoints"] = kpts;
+            pose_arr.push_back(pose);
+        }
+        model_results["pose"] = pose_arr;
+
+        // ---- face (5 keypoints) ----
+        json face_arr = json::array();
+        for (int i = 0; i < face_results.count; i++) {
+            json face;
+            face["bbox"] = {face_results.results[i].box.left,
+                            face_results.results[i].box.top,
+                            face_results.results[i].box.right,
+                            face_results.results[i].box.bottom};
+            face["class_name"] = "face";
+            face["score"] = face_results.results[i].prop;
+
+            json kpts;
+            for (int k = 0; k < 5; k++) {
+                char kname[16];
+                snprintf(kname, sizeof(kname), "kpt%d", k);
+                kpts[kname] = {{"x", face_results.results[i].keypoints[k][0]},
+                               {"y", face_results.results[i].keypoints[k][1]},
+                               {"score", face_results.results[i].keypoints[k][2]}};
+            }
+            face["keypoints"] = kpts;
+            face_arr.push_back(face);
+        }
+        model_results["face"] = face_arr;
+
+        j["model_results"] = model_results;
+
+        std::ofstream ofs(json_path);
+        ofs << j.dump(4);
+        ofs.close();
+        printf("Results saved to %s\n", json_path);
     }
 
-    write_image("result.png", &src_image);
+#if DRAW_IMAGE
+    write_multi_task_results(image_path, &src_image, &od_results, &pose_results, &face_results);
+#endif
 
 out:
     deinit_post_process();

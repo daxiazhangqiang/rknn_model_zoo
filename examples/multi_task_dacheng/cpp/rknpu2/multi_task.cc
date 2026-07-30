@@ -172,7 +172,7 @@ int inference_yolox_model(rknn_app_context_t *app_ctx, image_buffer_t *img,
     rknn_output outputs[app_ctx->io_num.n_output];
     const float nms_threshold = NMS_THRESH;      // 默认的NMS阈值
     const float box_conf_threshold = BOX_THRESH; // 默认的置信度阈值
-    int bg_color = 114;
+    int bg_color = 0;
     TIMER timer;
     timer.indent_set("");
 

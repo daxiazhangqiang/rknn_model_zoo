@@ -6,4 +6,5 @@ else
     echo "model=$1"
 fi
 
+# ./build-linux.sh -t rk3588 -a aarch64 -d "$1" -b Debug
 ./build-linux.sh -t rk3588 -a aarch64 -d "$1"
