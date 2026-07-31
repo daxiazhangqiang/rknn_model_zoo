@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Visualize multi-task JSON results (from C++ inference) as three separate images.
 
-Usage:
+Usage (single file):
     python vis_json_for_multi_task.py --image bus.jpg --json bus.json --out_dir ./vis_out
+
+Usage (batch folder):
+    python vis_json_for_multi_task.py --image ./test_imgs --json ./output_json --out_dir ./vis_out
 """
 
 import argparse
@@ -33,6 +36,9 @@ FACE_KPT_COLORS_BGR = [
     (255, 255, 255),  # white
     (0, 255, 255),    # yellow
 ]
+
+# Supported image extensions for folder mode
+IMAGE_EXTS = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.webp'}
 
 
 def _draw_coco_skeleton(img: np.ndarray,
@@ -154,22 +160,31 @@ def _convert_kpt_dict(d, num_kpts):
     return kpts, kpt_scores
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Visualize multi-task JSON results')
-    parser.add_argument('--image', type=str, required=True, help='Path to input image')
-    parser.add_argument('--json', type=str, required=True, help='Path to JSON result file')
-    parser.add_argument('--out_dir', type=str, required=True, help='Output directory')
-    args = parser.parse_args()
+def _find_image_files(img_dir: str):
+    """Recursively find all image files under img_dir."""
+    import glob
+    image_paths = []
+    for ext in IMAGE_EXTS:
+        image_paths.extend(glob.glob(os.path.join(img_dir, '**', f'*{ext}'), recursive=True))
+        image_paths.extend(glob.glob(os.path.join(img_dir, '**', f'*{ext.upper()}'), recursive=True))
+    return sorted(set(image_paths))
 
-    img = cv2.imread(args.image)
+
+def _process_one(img_path: str, json_path: str, out_dir: str):
+    """Process a single image-json pair, save 3 visualization images to out_dir."""
+    img = cv2.imread(img_path)
     if img is None:
-        raise FileNotFoundError(f'Image not found: {args.image}')
+        print(f'[WARN] Cannot read image: {img_path}, skipping')
+        return
 
-    with open(args.json, 'r') as f:
+    if not os.path.isfile(json_path):
+        print(f'[WARN] JSON not found: {json_path}, skipping {img_path}')
+        return
+
+    with open(json_path, 'r') as f:
         data = json.load(f)
 
-    os.makedirs(args.out_dir, exist_ok=True)
-    basename = os.path.splitext(os.path.basename(args.image))[0]
+    basename = os.path.splitext(os.path.basename(img_path))[0]
     mr = data.get('model_results', {})
 
     # ---- object (green boxes) ----
@@ -177,7 +192,7 @@ def main():
                 'class_name': r.get('class_name', '')}
                for r in mr.get('object', [])]
     visualize_single_task(img, obj_vis,
-                          os.path.join(args.out_dir, f'{basename}_od.jpg'),
+                          os.path.join(out_dir, f'{basename}_od.jpg'),
                           color=(0, 255, 0))
 
     # ---- pose (red boxes + 17-kpt skeleton) ----
@@ -188,7 +203,7 @@ def main():
                          'class_name': r.get('class_name', 'person'),
                          'keypoints': kpts, 'keypoint_scores': kpt_scores})
     visualize_single_task(img, pose_vis,
-                          os.path.join(args.out_dir, f'{basename}_pose.jpg'),
+                          os.path.join(out_dir, f'{basename}_pose.jpg'),
                           color=(255, 0, 0))
 
     # ---- face (red/blue boxes + 5-point landmarks) ----
@@ -199,10 +214,45 @@ def main():
                          'class_name': r.get('class_name', 'face'),
                          'keypoints': kpts, 'keypoint_scores': kpt_scores})
     visualize_single_task(img, face_vis,
-                          os.path.join(args.out_dir, f'{basename}_face.jpg'),
+                          os.path.join(out_dir, f'{basename}_face.jpg'),
                           color=(0, 0, 255))
 
-    print(f'[INFO] All visualizations saved to {args.out_dir}')
+
+def main():
+    parser = argparse.ArgumentParser(description='Visualize multi-task JSON results')
+    parser.add_argument('--image', type=str, required=True,
+                        help='Path to input image file or image folder')
+    parser.add_argument('--json', type=str, required=True,
+                        help='Path to JSON result file or JSON folder')
+    parser.add_argument('--out_dir', type=str, required=True, help='Output directory')
+    args = parser.parse_args()
+
+    is_img_dir = os.path.isdir(args.image)
+
+    if is_img_dir:
+        # ---- Batch folder mode ----
+        if not os.path.isdir(args.json):
+            raise ValueError(
+                f'--image is a folder, --json must also be a folder. Got: {args.json}')
+
+        image_paths = _find_image_files(args.image)
+        if not image_paths:
+            print(f'[WARN] No image files found under: {args.image}')
+            return
+
+        print(f'[INFO] Found {len(image_paths)} image(s) in {args.image}')
+        for img_path in image_paths:
+            basename = os.path.splitext(os.path.basename(img_path))[0]
+            json_path = os.path.join(args.json, f'{basename}.json')
+            img_out_dir = os.path.join(args.out_dir, basename)
+            print(f'[INFO] Processing: {os.path.basename(img_path)}')
+            _process_one(img_path, json_path, img_out_dir)
+
+        print(f'[INFO] All visualizations saved to {args.out_dir}')
+    else:
+        # ---- Single file mode (original behavior) ----
+        _process_one(args.image, args.json, args.out_dir)
+        print(f'[INFO] All visualizations saved to {args.out_dir}')
 
 
 if __name__ == '__main__':
