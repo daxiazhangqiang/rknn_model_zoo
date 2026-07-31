@@ -1,7 +1,7 @@
 import sys
 from rknn.api import RKNN
 
-DATASET_PATH = '../../../datasets/COCO/coco_subset_20.txt'
+DATASET_PATH = '../../../datasets/COCO/coco_subset_100.txt'
 DEFAULT_RKNN_PATH = '../model/multi_task_obt_pose_face.rknn'
 DEFAULT_QUANT = True
 
