@@ -1,0 +1,68 @@
+I rknn-toolkit2 version: 2.3.2
+I target set by user is: rk3588
+I rknn-toolkit2 version: 2.3.2
+I target set by user is: rk3588
+[1;33mW[0m [1;33minference: The 'data_format' is not set, and its default value is 'nhwc'![0m
+[1;33mW[0m [1;33minference: The 'data_format' is not set, and its default value is 'nhwc'![0m
+[1;33mW[0m [1;33minference: The 'data_format' is not set, and its default value is 'nhwc'![0m
+[1;33mW[0m [1;33minference: The 'data_format' is not set, and its default value is 'nhwc'![0m
+[1;33mW[0m [1;33minference: The 'data_format' is not set, and its default value is 'nhwc'![0m
+[1;33mW[0m [1;33minference: The 'data_format' is not set, and its default value is 'nhwc'![0m
+注册库共 16 人
+image_size: (320, 320)  num_priors= 4200
+[000000376136] 未检测到人脸
+image_size: (320, 320)  num_priors= 4200
+[000000523684] 未检测到人脸
+image_size: (320, 320)  num_priors= 4200
+[51_Dresses_wearingdress_51_150] face 0 -> 未注册 (最高相似度 0.1495)
+image_size: (320, 320)  num_priors= 4200
+[51_Dresses_wearingdress_51_161] face 0 -> 未注册 (最高相似度 0.2098)
+image_size: (320, 320)  num_priors= 4200
+[51_Dresses_wearingdress_51_178] 未检测到人脸
+image_size: (320, 320)  num_priors= 4200
+[51_Dresses_wearingdress_51_183] face 0 -> 未注册 (最高相似度 0.1203)
+[51_Dresses_wearingdress_51_183] face 1 -> 未注册 (最高相似度 0.1867)
+[51_Dresses_wearingdress_51_183] face 2 -> 未注册 (最高相似度 0.0765)
+[51_Dresses_wearingdress_51_183] face 3 -> 未注册 (最高相似度 0.1316)
+image_size: (320, 320)  num_priors= 4200
+[51_Dresses_wearingdress_51_221] face 0 -> 未注册 (最高相似度 0.1368)
+[51_Dresses_wearingdress_51_221] face 1 -> 未注册 (最高相似度 0.1027)
+image_size: (320, 320)  num_priors= 4200
+[51_Dresses_wearingdress_51_226] face 0 -> 未注册 (最高相似度 0.0742)
+image_size: (320, 320)  num_priors= 4200
+[51_Dresses_wearingdress_51_233] 未检测到人脸
+image_size: (320, 320)  num_priors= 4200
+[51_Dresses_wearingdress_51_268] face 0 -> 未注册 (最高相似度 0.1010)
+image_size: (320, 320)  num_priors= 4200
+[51_Dresses_wearingdress_51_280] face 0 -> 未注册 (最高相似度 0.2416)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_432] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_432 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_492] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_492 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_521] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_521 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_552] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_552 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_563] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_563_0 (相似度 1.0000)
+[9_Press_Conference_Press_Conference_9_563] face 1 -> 识别为: 9_Press_Conference_Press_Conference_9_563_1 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_571] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_571 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_594] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_594 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_595] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_595 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_767] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_767 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_784] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_784 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_828] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_828 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_849] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_849 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_872] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_872 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_883] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_883 (相似度 1.0000)
+image_size: (320, 320)  num_priors= 4200
+[9_Press_Conference_Press_Conference_9_907] face 0 -> 识别为: 9_Press_Conference_Press_Conference_9_907 (相似度 1.0000)
