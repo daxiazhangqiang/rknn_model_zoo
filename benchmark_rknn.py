@@ -47,6 +47,10 @@ def main():
     p.add_argument('--device-id', type=int, default=None, help='Device id when initializing runtime')
     p.add_argument('--perf-debug', action='store_true', dest='perf_debug', default=False, help='Enable RKNN perf_debug when init_runtime')
     p.add_argument('--eval-mem', action='store_true', dest='eval_mem', default=False, help='Enable RKNN memory eval when init_runtime')
+    p.add_argument('--data-format', default='nhwc',
+                   help="Layout of the input numpy passed to rknn.inference: 'nhwc' (default) "
+                        "or 'nchw'. Use 'nchw' when feeding NCHW arrays (e.g. "
+                        "--random-shape 1,3,384,640 or an NCHW --input-npy).")
 
     args = p.parse_args()
 
@@ -78,7 +82,8 @@ def main():
                                 target=args.target, 
                                 device_id=args.device_id, 
                                 perf_debug=args.perf_debug,
-                                eval_mem=args.eval_mem)
+                                eval_mem=args.eval_mem,
+                                data_format=args.data_format)
 
     # Warm-up
     print(f'Warm-up {args.warmup} runs...')

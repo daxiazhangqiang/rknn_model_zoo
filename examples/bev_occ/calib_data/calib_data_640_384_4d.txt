@@ -1,0 +1,2 @@
+/home/robot/zhangqiang/rknn_model_zoo/examples/bev_occ/calib_data_640_384_4d/calib_rand_0.npy
+/home/robot/zhangqiang/rknn_model_zoo/examples/bev_occ/calib_data_640_384_4d/calib_rand_1.npy

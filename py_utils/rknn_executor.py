@@ -8,6 +8,7 @@ class RKNN_model_container():
                  device_id=None, 
                  perf_debug=False,
                  eval_mem=False,
+                 data_format='nhwc',
                  **kwargs) -> None:
         rknn = RKNN()
 
@@ -29,6 +30,7 @@ class RKNN_model_container():
         print('done')
         
         self.rknn = rknn
+        self.data_format = data_format
 
     # def __del__(self):
     #     self.release()
@@ -43,7 +45,7 @@ class RKNN_model_container():
         else:
             inputs = [inputs]
 
-        result = self.rknn.inference(inputs=inputs)
+        result = self.rknn.inference(inputs=inputs, data_format=self.data_format)
     
         return result
 
