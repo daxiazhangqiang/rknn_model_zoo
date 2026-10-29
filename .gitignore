@@ -54,3 +54,9 @@ unittest/env_config.py
 #user workspace
 zhangqiang/
 datasets/
+
+# 将业务默认模型纳入版本管理，克隆后可直接使用
+!/examples/bev_occ/model/*.onnx
+!/examples/bev_occ/model/*.rknn
+!/examples/multi_task_dacheng/model/*.onnx
+!/examples/multi_task_dacheng/model/*.rknn
